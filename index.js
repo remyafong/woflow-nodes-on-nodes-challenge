@@ -7,23 +7,12 @@ import fetch from "node-fetch";
 const traverseTree = async function(id) {
     let queue = [];
     const nodeMap = new Map();
+    nodeMap.set(id, 1);
 
     queue.push(id);
     while (queue.length > 0) {
         // Takes all ids from queue
         let ids = queue;
-        // For each id
-        for (let i = 0; i < ids.length; i++) {
-            if (nodeMap.has(ids[i])) {
-                // Increment occurence count for id
-                nodeMap.set(ids[i], nodeMap.get(ids[i])+1);
-            }
-            else {
-                // Add new entry for id
-                nodeMap.set(ids[i], 1);
-            }
-        }
-        // Empty queue 
         queue = [];
 
         // Fetch data for ids
@@ -32,8 +21,16 @@ const traverseTree = async function(id) {
             for (let i = 0; i < data.length; i++) {
                 const child_ids = data[i].child_node_ids;
                 for (let j = 0; j < child_ids.length; j++) {
-                    // Add child ids to queue
-                    queue.push(child_ids[j]);
+                    if (nodeMap.has(child_ids[j])) {
+                        // Increment occurence count for id
+                        nodeMap.set(child_ids[j], nodeMap.get(child_ids[j])+1);
+                    }
+                    else {
+                        // Add new entry for id
+                        nodeMap.set(child_ids[j], 1);
+                        // Only need to explore id if we haven't seen it before
+                        queue.push(child_ids[j]);
+                    }
                 }
             }
         }
